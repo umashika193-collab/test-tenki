@@ -120,6 +120,18 @@ h1 {
     flex-direction: column;
 }
 
+.header-settings {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.5px;
+}
+
 .location-name {
     font-size: 0.8rem;
     color: #aaa;
@@ -148,7 +160,9 @@ h1 {
 
 /* 傘の目安ガイド */
 .umbrella-guide {
-    margin: 0.5rem auto 2rem;
+    margin: -70px auto 2rem;
+    position: relative;
+    z-index: 5;
     padding: 1.5rem;
     max-width: 600px;
     background: var(--card-bg);
