@@ -146,6 +146,49 @@ h1 {
     display: none;
 }
 
+/* 傘の目安ガイド */
+.umbrella-guide {
+    margin: 0.5rem auto 2rem;
+    padding: 1.5rem;
+    max-width: 600px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}
+
+.umbrella-guide h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--accent-color);
+}
+
+.umbrella-guide ul {
+    list-style: none;
+    font-size: 0.95rem;
+}
+
+.umbrella-guide li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.umbrella-guide li:last-child {
+    border-bottom: none;
+}
+
+.umbrella-guide strong {
+    color: #fff;
+    font-weight: 500;
+}
+
+.umbrella-guide span {
+    color: #bbb;
+}
+
 /* リスト表示 (6列 x 3行のグリッド) */
 .forecast-list {
     display: grid;
