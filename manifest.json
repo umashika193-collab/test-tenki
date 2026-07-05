@@ -1,0 +1,16 @@
+{
+  "name": "アッパレ",
+  "short_name": "アッパレ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1b",
+  "theme_color": "#0f0f1b",
+  "description": "降水確率と降水量に特化した天気アプリ",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

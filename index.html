@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 脆弱性対策: Content Security Policy (CSP) の導入 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+    <title>アッパレ</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- メインコンテンツ -->
+    <main>
+        <header>
+            <div class="header-title">
+                <h1>アッパレ</h1>
+                <div id="location-name" class="location-name">位置情報取得中...</div>
+            </div>
+            <button id="btn-settings" class="btn-icon" aria-label="位置情報の設定を開く" title="設定">⚙️</button>
+        </header>
+
+        <div id="loading" class="loading hidden">予報を読み込み中...</div>
+        
+        <!-- 天気リスト表示領域 -->
+        <div id="forecast-list" class="forecast-list"></div>
+    </main>
+
+    <!-- 設定モーダル -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>位置情報の設定</h2>
+            <div class="form-group">
+                <label for="input-lat">緯度 (Latitude)</label>
+                <input type="number" id="input-lat" step="0.0001" placeholder="35.6895">
+            </div>
+            <div class="form-group">
+                <label for="input-lon">経度 (Longitude)</label>
+                <input type="number" id="input-lon" step="0.0001" placeholder="139.6917">
+            </div>
+            <div class="modal-actions">
+                <button id="btn-get-gps" class="btn-primary">📍 現在地を取得</button>
+                <button id="btn-save-settings" class="btn-success">保存して更新</button>
+                <button id="btn-close-settings" class="btn-secondary">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

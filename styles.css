@@ -1,0 +1,410 @@
+:root {
+    --bg-color: #0f0f1b;
+    --text-color: #e0e0e0;
+    --accent-color: #00d2ff;
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --rain-color: #82c0ff; /* より薄い青 (50%未満用) */
+    --heavy-rain-color: #1d4ed8; /* より深い青 (50%超用) */
+    --alert-bg: #e63946;
+    --alert-text: #fff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* アラートバナー */
+.alert-banner {
+    background-color: var(--alert-bg);
+    color: var(--alert-text);
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.alert-banner.hidden {
+    display: none;
+}
+
+/* カッパのアニメーション */
+@keyframes breakdance {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(90deg) scale(1.2); }
+    50% { transform: rotate(180deg) scale(1); }
+    75% { transform: rotate(270deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes ganbare {
+    0%, 100% { transform: translateY(0) scale(1, 1); }
+    15% { transform: translateY(3px) scale(1.15, 0.85); } /* 予備動作 (沈み込み) */
+    35% { transform: translateY(-20px) scale(0.85, 1.15); } /* ジャンプ (伸びる) */
+    45% { transform: translateY(-22px) scale(1, 1); } /* 頂点 */
+    60% { transform: translateY(0) scale(0.9, 1.1); } /* 着地へ向かう */
+    70% { transform: translateY(4px) scale(1.2, 0.8); } /* 着地の衝撃 (潰れる) */
+    85% { transform: translateY(0) scale(0.95, 1.05); } /* 反動 */
+}
+
+@keyframes dried {
+    0%, 100% { transform: scaleY(1); opacity: 0.6; filter: grayscale(100%); }
+    50% { transform: scaleY(0.95); opacity: 0.4; filter: grayscale(100%); }
+}
+
+.kappa-breakdance {
+    animation: breakdance 0.8s infinite linear;
+}
+
+.kappa-dance {
+    animation: ganbare 0.8s infinite ease-in-out;
+}
+
+.kappa-dried {
+    animation: dried 3s infinite ease-in-out;
+}
+
+.kappa-normal {
+    /* 何もしない、待機 */
+}
+
+/* メインレイアウト */
+main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+h1 {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.location-name {
+    font-size: 0.8rem;
+    color: #aaa;
+    margin-top: 0.2rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0.5rem;
+}
+
+.loading {
+    text-align: center;
+    font-size: 1.2rem;
+    margin: 2rem 0;
+    color: var(--accent-color);
+}
+
+.loading.hidden {
+    display: none;
+}
+
+/* リスト表示 (6列 x 3行のグリッド) */
+.forecast-list {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding-bottom: 80px; /* カッパとかぶらないように */
+    width: 100%;
+}
+
+.forecast-item {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 0.5rem 0.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    backdrop-filter: blur(10px);
+}
+
+.forecast-item.rain {
+    background: rgba(58, 134, 255, 0.25);
+    border-color: rgba(58, 134, 255, 0.8);
+}
+
+.forecast-item.heavy-rain {
+    background: rgba(29, 78, 216, 0.3);
+    border-color: rgba(29, 78, 216, 0.9);
+}
+
+/* 特定時間帯の強調表示 */
+.forecast-item.highlight-time {
+    border-color: rgba(255, 215, 0, 0.5); /* ゴールドっぽい境界線 */
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 0.1);
+}
+
+.forecast-item.highlight-time .time {
+    color: #ffd700; /* 時間の文字色をゴールドに */
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* 0:00 (日またぎ) の強調 */
+.forecast-item.midnight-boundary {
+    border-left: 3px solid var(--accent-color);
+    background: linear-gradient(90deg, rgba(0, 210, 255, 0.15) 0%, transparent 100%);
+}
+
+.forecast-item.midnight-boundary .time {
+    color: var(--accent-color);
+    font-size: 0.8rem;
+    text-shadow: 0 0 5px rgba(0, 210, 255, 0.5);
+}
+
+.time-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.time {
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: #aaa;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 1.1;
+}
+
+/* 行ごとのカッパ */
+.row-kappa {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+.row-kappa-breakdance {
+    animation: breakdance 1s infinite linear;
+}
+
+.row-kappa-dance {
+    animation: ganbare 0.7s infinite ease-in-out;
+    background: radial-gradient(circle, rgba(0, 210, 255, 0.5) 0%, rgba(58, 134, 255, 0) 70%);
+    border-radius: 50%;
+}
+
+.row-kappa-dried {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+/* 超ストイックなメイン情報 (グリッド用に小型化) */
+.primary-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.info-label {
+    font-size: 0.6rem;
+    color: #888;
+    margin-bottom: -0.1rem;
+    margin-top: 0.2rem;
+}
+
+.forecast-item.rain .info-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.prob {
+    font-size: 1.4rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--text-color);
+}
+
+.forecast-item.rain .prob {
+    color: var(--rain-color);
+}
+
+.forecast-item.heavy-rain .prob {
+    color: var(--heavy-rain-color);
+    text-shadow: 0 0 15px rgba(29, 78, 216, 0.6); /* 暗い背景でも読めるように少し発光させる */
+}
+
+.prob small {
+    font-size: 0.7rem;
+    font-weight: normal;
+}
+
+.amount {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #888;
+    margin-top: 0.2rem;
+}
+
+.forecast-item.rain .amount {
+    color: #fff;
+}
+
+/* モーダル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: var(--bg-color);
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    width: 90%;
+    max-width: 400px;
+}
+
+.modal-content h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 2rem;
+}
+
+button {
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+button:active {
+    opacity: 0.7;
+}
+
+.btn-primary {
+    background: #4cc9f0;
+    color: #000;
+}
+
+.btn-success {
+    background: #4361ee;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: #fff;
+}
+
+/* スマホ用レスポンシブ対応 (極小画面用) */
+@media (max-width: 380px) {
+    main {
+        padding: 0.5rem;
+    }
+    
+    .forecast-list {
+        gap: 2px;
+    }
+    
+    .forecast-item {
+        padding: 0.4rem 0.1rem;
+    }
+    
+    .prob {
+        font-size: 1.1rem;
+    }
+    
+    .prob small {
+        font-size: 0.6rem;
+    }
+    
+    .time {
+        font-size: 0.65rem;
+    }
+    
+    .info-label {
+        font-size: 0.55rem;
+    }
+    
+    .amount {
+        font-size: 0.7rem;
+    }
+    
+    .row-kappa {
+        width: 20px;
+        height: 20px;
+    }
+}
