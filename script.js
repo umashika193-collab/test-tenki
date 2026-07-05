@@ -220,16 +220,28 @@ function renderItem(date, prob, amount, isFirst) {
     let rowKappaSrc = 'icon_normal.png';
     let rowKappaClass = 'row-kappa-normal';
     let kappaStyle = '';
+    let extraHtml = '';
     
-    if (prob === 100) {
+    if (amount >= 30) {
+        rowKappaSrc = 'icon_dancing.png';
+        rowKappaClass = 'row-kappa-runaway';
+        // 画面外のランダムな方向へ吹っ飛ぶための座標を計算 (-800px 〜 800px)
+        const flyX = (Math.random() - 0.5) * 1600;
+        const flyY = (Math.random() - 0.5) * 1600 - 200; // 少し上方向にバイアス
+        kappaStyle = `style="--fly-x: ${flyX}px; --fly-y: ${flyY}px;"`;
+        extraHtml = '<div class="puddle"></div>'; // 水溜りを設置
+    } else if (prob === 100 && amount >= 0.6) {
         rowKappaSrc = 'icon_dancing.png';
         rowKappaClass = 'row-kappa-breakdance';
-    } else if (prob > 30) {
+    } else if (prob > 40 && amount >= 0.6) {
         rowKappaSrc = 'icon_dancing.png';
         rowKappaClass = 'row-kappa-dance';
-        // 確率に応じてダンスの激しさ（速度）にグラデーションをつける (31%で1.2秒, 99%で0.4秒)
-        const speed = 1.2 - ((prob - 30) / 69) * 0.8;
+        // 確率に応じてダンスの激しさ（速度）にグラデーションをつける (41%で1.2秒, 99%で0.4秒)
+        const speed = 1.2 - ((prob - 40) / 59) * 0.8;
         kappaStyle = `style="animation-duration: ${speed}s;"`;
+    } else if (prob > 0) {
+        rowKappaSrc = 'icon_normal.png';
+        rowKappaClass = 'row-kappa-normal';
     } else if (prob === 0) {
         rowKappaSrc = 'icon_dried.png';
         rowKappaClass = 'row-kappa-dried';
@@ -257,6 +269,7 @@ function renderItem(date, prob, amount, isFirst) {
     div.innerHTML = `
         <div class="time-container">
             <div class="time">${timeDisplay}</div>
+            ${extraHtml}
             <img src="${rowKappaSrc}" class="row-kappa ${rowKappaClass}" alt="kappa" ${kappaStyle}>
         </div>
         <div class="primary-info">
