@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appare-cache-v4';
+const CACHE_NAME = 'appare-cache-v5';
 const urlsToCache = [
   './',
   './index.html',
