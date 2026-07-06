@@ -39,10 +39,14 @@ self.addEventListener('fetch', event => {
   // 常に最新のファイルを取りに行き、オフライン時のみキャッシュを使う
   event.respondWith(
     fetch(event.request).then(response => {
-      return caches.open(CACHE_NAME).then(cache => {
-        cache.put(event.request, response.clone());
-        return response;
-      });
+      // 正常なレスポンス(200)の場合のみキャッシュを更新（エラーキャッシュによる汚染を防ぐ）
+      if (response && response.status === 200) {
+        const responseClone = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+      }
+      return response;
     }).catch(() => {
       return caches.match(event.request);
     })

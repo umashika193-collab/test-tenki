@@ -8,6 +8,9 @@
     <title>アッパレ</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -20,6 +23,7 @@
                 <div id="location-name" class="location-name">位置情報取得中...</div>
             </div>
             <div class="header-settings">
+                <button id="btn-refresh" class="btn-icon" aria-label="更新" title="更新">🔄</button>
                 <span class="settings-label">現在地を設定</span>
                 <button id="btn-settings" class="btn-icon" aria-label="位置情報の設定を開く" title="設定">⚙️</button>
             </div>
@@ -46,6 +50,18 @@
     <div id="settings-modal" class="modal hidden">
         <div class="modal-content">
             <h2>位置情報の設定</h2>
+
+            <!-- 地名検索エリア -->
+            <div class="search-section">
+                <div class="form-group search-group">
+                    <input type="text" id="input-search" placeholder="地名を入力 (例: 東京, 大阪, ニューヨーク)">
+                    <button id="btn-search" class="btn-primary">🔍 検索</button>
+                </div>
+                <div id="search-results" class="search-results"></div>
+            </div>
+
+            <hr class="modal-divider">
+
             <div class="form-group">
                 <label for="input-lat">緯度 (Latitude)</label>
                 <input type="number" id="input-lat" step="0.0001" placeholder="35.6895">

@@ -7,9 +7,13 @@ const settingsModal = document.getElementById('settings-modal');
 const btnCloseSettings = document.getElementById('btn-close-settings');
 const btnGetGps = document.getElementById('btn-get-gps');
 const btnSaveSettings = document.getElementById('btn-save-settings');
+const btnRefresh = document.getElementById('btn-refresh');
 
 const inputLat = document.getElementById('input-lat');
 const inputLon = document.getElementById('input-lon');
+const inputSearch = document.getElementById('input-search');
+const btnSearch = document.getElementById('btn-search');
+const searchResults = document.getElementById('search-results');
 
 // デフォルトは東京
 let currentLat = 35.6895;
@@ -79,6 +83,25 @@ function setupEventListeners() {
 
     btnSaveSettings.addEventListener('click', saveSettings);
 
+    if (btnSearch) {
+        btnSearch.addEventListener('click', searchLocation);
+        inputSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchLocation();
+            }
+        });
+    }
+
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', () => {
+            const cacheKey = `appare_weather_${currentLat.toFixed(2)}_${currentLon.toFixed(2)}`;
+            const cacheTimeKey = `${cacheKey}_time`;
+            localStorage.removeItem(cacheKey);
+            localStorage.removeItem(cacheTimeKey);
+            fetchWeather();
+        });
+    }
+
     btnGetGps.addEventListener('click', () => {
         if (!navigator.geolocation) {
             alert('お使いのブラウザは位置情報に対応していません。');
@@ -91,6 +114,7 @@ function setupEventListeners() {
                 inputLat.value = position.coords.latitude.toFixed(4);
                 inputLon.value = position.coords.longitude.toFixed(4);
                 btnGetGps.textContent = '📍 現在地を取得';
+                saveSettings(); // 自動的に保存して更新
             },
             (error) => {
                 alert('位置情報を取得できませんでした。権限を確認してください。');
@@ -98,6 +122,55 @@ function setupEventListeners() {
             }
         );
     });
+}
+
+async function searchLocation() {
+    const query = inputSearch.value.trim();
+    if (!query) return;
+
+    btnSearch.textContent = '検索中...';
+    btnSearch.disabled = true;
+    searchResults.innerHTML = '<div style="padding: 1rem; text-align: center;">検索中...</div>';
+
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&accept-language=ja`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        searchResults.innerHTML = '';
+        if (data.length === 0) {
+            searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: #aaa;">見つかりませんでした</div>';
+        } else {
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-result-item';
+                
+                const nameParts = item.display_name.split(', ');
+                const mainName = nameParts[0];
+                const descName = nameParts.slice(1).join(', ');
+
+                div.innerHTML = `
+                    <div class="item-name">${mainName}</div>
+                    <div class="item-desc">${descName}</div>
+                `;
+                
+                div.addEventListener('click', () => {
+                    inputLat.value = parseFloat(item.lat).toFixed(4);
+                    inputLon.value = parseFloat(item.lon).toFixed(4);
+                    inputSearch.value = '';
+                    searchResults.innerHTML = '';
+                    saveSettings(); // 自動的に保存して更新
+                });
+                
+                searchResults.appendChild(div);
+            });
+        }
+    } catch (error) {
+        searchResults.innerHTML = '<div style="padding: 1rem; text-align: center; color: red;">エラーが発生しました</div>';
+    } finally {
+        btnSearch.textContent = '🔍 検索';
+        btnSearch.disabled = false;
+    }
 }
 
 async function fetchLocationName(lat, lon) {
@@ -177,13 +250,15 @@ function processWeatherData(hourly) {
     const precip = hourly.precipitation;
     
     forecastList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
     
     // 取得したデータの中で「一番最初にある偶数時間」を開始位置にする
     // (Open-Meteoは現在時刻からデータを返すため、現在が奇数時間だと配列の最初が奇数時間になる)
     let startIndex = 0;
     for (let i = 0; i < times.length; i++) {
-        const d = new Date(times[i]);
-        if (d.getHours() % 2 === 0) {
+        const timeStr = times[i];
+        const hour = parseInt(timeStr.substring(11, 13), 10);
+        if (hour % 2 === 0) {
             startIndex = i;
             break;
         }
@@ -194,26 +269,30 @@ function processWeatherData(hourly) {
         const timeStr = times[i];
         const prob = probs[i];
         const amount = precip[i];
-        const date = new Date(timeStr);
         
         const isFirst = (i === startIndex);
-        renderItem(date, prob, amount, isFirst);
+        renderItem(timeStr, prob, amount, isFirst, fragment);
     }
+    
+    forecastList.appendChild(fragment);
 }
 
-function renderItem(date, prob, amount, isFirst) {
+function renderItem(timeStr, prob, amount, isFirst, fragment) {
     const isRain = prob >= 30;
     
     // 時間のフォーマット (例: 7/5 14:00)
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const datePart = timeStr.split('T')[0];
+    const timePart = timeStr.split('T')[1];
+    const [yearStr, monthStr, dayStr] = datePart.split('-');
+    const [hourStr, minStr] = timePart.split(':');
     
-    let timeDisplay = `${month}/${day} ${hours}:${minutes}`;
+    const month = parseInt(monthStr, 10);
+    const day = parseInt(dayStr, 10);
+    const hourNum = parseInt(hourStr, 10);
+    
+    let timeDisplay = `${month}/${day} ${hourStr}:${minStr}`;
     
     // 特定の時間帯を強調 (6, 8, 10, 12, 14, 16時)
-    const hourNum = date.getHours();
     const isHighlightHour = [6, 8, 10, 12, 14, 16].includes(hourNum);
     
     // 行ごとのカッパアイコン判定
@@ -247,7 +326,7 @@ function renderItem(date, prob, amount, isFirst) {
         rowKappaClass = 'row-kappa-dried';
     }
     
-    const isMidnight = (date.getHours() === 0);
+    const isMidnight = (hourNum === 0);
     
     const div = document.createElement('div');
     let classes = `forecast-item`;
@@ -270,7 +349,7 @@ function renderItem(date, prob, amount, isFirst) {
         <div class="time-container">
             <div class="time">${timeDisplay}</div>
             ${extraHtml}
-            <img src="${rowKappaSrc}" class="row-kappa ${rowKappaClass}" alt="kappa" ${kappaStyle}>
+            <img src="${rowKappaSrc}" class="row-kappa ${rowKappaClass}" alt="" ${kappaStyle}>
         </div>
         <div class="primary-info">
             <div class="info-label">降水確率</div>
@@ -280,7 +359,7 @@ function renderItem(date, prob, amount, isFirst) {
         </div>
     `;
     
-    forecastList.appendChild(div);
+    fragment.appendChild(div);
 }
 
 // 起動
