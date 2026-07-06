@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2">
 </head>
 <body>
     <!-- アップデート通知バナー -->
@@ -62,10 +62,10 @@
 
             <!-- 地名検索エリア -->
             <div class="search-section">
-                <div class="form-group search-group">
+                <form id="search-form" class="form-group search-group">
                     <input type="text" id="input-search" placeholder="地名を入力 (例: 東京, 大阪, ニューヨーク)">
-                    <button id="btn-search" class="btn-primary">🔍 検索</button>
-                </div>
+                    <button type="submit" id="btn-search" class="btn-primary">🔍 検索</button>
+                </form>
                 <div id="search-results" class="search-results"></div>
             </div>
 
@@ -87,6 +87,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
 </body>
 </html>

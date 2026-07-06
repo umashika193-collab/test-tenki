@@ -125,12 +125,12 @@ function setupEventListeners() {
 
     btnSaveSettings.addEventListener('click', saveSettings);
 
-    if (btnSearch) {
-        btnSearch.addEventListener('click', searchLocation);
-        inputSearch.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                searchLocation();
-            }
+    const searchForm = document.getElementById('search-form');
+    if (searchForm) {
+        searchForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            searchLocation();
+            inputSearch.blur(); // スマホのキーボードを閉じる
         });
     }
 
