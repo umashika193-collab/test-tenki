@@ -19,14 +19,56 @@ const searchResults = document.getElementById('search-results');
 let currentLat = 35.6895;
 let currentLon = 139.6917;
 
-// PWA Service Worker 登録
+// PWA Service Worker 登録とアップデート検知
+let newWorker;
+const updateBanner = document.getElementById('update-banner');
+const btnUpdateYes = document.getElementById('btn-update-yes');
+const btnUpdateNo = document.getElementById('btn-update-no');
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(registration => {
             console.log('SW registered: ', registration);
+            
+            registration.addEventListener('updatefound', () => {
+                newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        updateBanner.classList.remove('hidden');
+                    }
+                });
+            });
+            
+            if (registration.waiting) {
+                newWorker = registration.waiting;
+                updateBanner.classList.remove('hidden');
+            }
         }).catch(registrationError => {
             console.log('SW registration failed: ', registrationError);
         });
+        
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+                refreshing = true;
+                window.location.reload();
+            }
+        });
+    });
+}
+
+if (btnUpdateYes) {
+    btnUpdateYes.addEventListener('click', () => {
+        if (newWorker) {
+            newWorker.postMessage({ action: 'skipWaiting' });
+        }
+        updateBanner.classList.add('hidden');
+    });
+}
+
+if (btnUpdateNo) {
+    btnUpdateNo.addEventListener('click', () => {
+        updateBanner.classList.add('hidden');
     });
 }
 

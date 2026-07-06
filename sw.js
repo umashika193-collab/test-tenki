@@ -1,4 +1,4 @@
-const CACHE_NAME = 'appare-cache-v2';
+const CACHE_NAME = 'appare-cache-v3';
 const urlsToCache = [
   './',
   './index.html',
@@ -11,7 +11,6 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // 新しいSWをすぐに待機状態からアクティブにする
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -51,4 +50,10 @@ self.addEventListener('fetch', event => {
       return caches.match(event.request);
     })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
