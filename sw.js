@@ -1,9 +1,9 @@
-const CACHE_NAME = 'appare-cache-v13';
+const CACHE_NAME = 'appare-cache-v1.0.0';
 const urlsToCache = [
   './',
   './index.html',
-  './styles.css?v=8',
-  './script.js?v=9',
+  './styles.css?v=1.0.0',
+  './script.js?v=1.0.0',
   './manifest.json',
   './icon_normal.png',
   './icon_dancing.png',

@@ -6,13 +6,14 @@
     <!-- 脆弱性対策: Content Security Policy (CSP) の導入 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; img-src 'self' data:; style-src 'self'; script-src 'self'; manifest-src 'self'; worker-src 'self'; form-action 'self';">
     <title>アッパレ</title>
+    <meta name="application-version" content="1.0.0">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=8">
+    <link rel="stylesheet" href="styles.css?v=1.0.0">
 </head>
 <body>
     <!-- アップデート通知バナー -->
@@ -74,6 +75,10 @@
                 10 mm/h以上は<a href="https://www.jma.go.jp/jma/kishou/know/yougo_hp/amehyo.html" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">気象庁「雨の強さと降り方」</a>に準拠。10 mm/h未満の傘の種類は本アプリ独自の目安です。
             </p>
         </div>
+
+        <footer class="app-footer">
+            <span aria-label="アプリのバージョン 1.0.0">Version 1.0.0</span>
+        </footer>
     </main>
 
     <!-- 設定モーダル -->
@@ -115,6 +120,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=9"></script>
+    <script src="script.js?v=1.0.0"></script>
 </body>
 </html>
