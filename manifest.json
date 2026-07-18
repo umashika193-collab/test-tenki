@@ -5,16 +5,11 @@
   "display": "standalone",
   "background_color": "#0f0f1b",
   "theme_color": "#0f0f1b",
-  "description": "降水確率と降水量に特化した天気アプリ",
+  "description": "7時から17時までの傘の必要度がひと目で分かる天気アプリ",
   "icons": [
     {
       "src": "icon.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]

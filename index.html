@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 脆弱性対策: Content Security Policy (CSP) の導入 -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; connect-src 'self' https://api.open-meteo.com https://nominatim.openstreetmap.org; img-src 'self' data:; style-src 'self'; script-src 'self'; manifest-src 'self'; worker-src 'self'; form-action 'self';">
     <title>アッパレ</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1a1a2e">
@@ -12,11 +12,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="apple-touch-icon" href="icon.png">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
     <!-- アップデート通知バナー -->
-    <div id="update-banner" class="update-banner hidden">
+    <div id="update-banner" class="update-banner hidden" role="status" aria-live="polite">
         <div class="update-message">新しいバージョンが利用可能です。</div>
         <div class="update-actions">
             <button id="btn-update-yes" class="btn-primary">アプリを更新する</button>
@@ -38,32 +38,53 @@
             </div>
         </header>
 
-        <div id="loading" class="loading hidden">予報を読み込み中...</div>
+        <div id="loading" class="loading hidden" role="status" aria-live="polite">予報を読み込み中...</div>
+
+        <!-- 7時から17時までの傘判断 -->
+        <section id="umbrella-summary" class="umbrella-summary hidden" aria-live="polite">
+            <div class="umbrella-summary-visual" aria-hidden="true">
+                <img id="umbrella-summary-icon" class="umbrella-summary-icon row-kappa-normal" src="icon_normal.png" alt="">
+            </div>
+            <div class="umbrella-summary-content">
+                <div id="umbrella-summary-label" class="umbrella-summary-eyebrow">7〜17時の傘</div>
+                <h2 id="umbrella-verdict">予報を確認中</h2>
+                <p id="umbrella-reason" class="umbrella-reason"></p>
+                <div class="umbrella-summary-meta">
+                    <span id="umbrella-window"></span>
+                    <span id="forecast-updated-at"></span>
+                </div>
+            </div>
+        </section>
         
         <!-- 天気リスト表示領域 -->
         <div id="forecast-list" class="forecast-list"></div>
 
         <!-- 傘の目安ガイド -->
         <div class="umbrella-guide">
-            <h3>降水量と傘の目安</h3>
+            <h3>1時間雨量と傘・行動の目安</h3>
             <ul>
-                <li><strong>0.1 〜 0.5 mm</strong><span>霧雨・小雨（折りたたみ傘推奨）</span></li>
-                <li><strong>0.6 〜 2.9 mm</strong><span>本降り（普通の傘が必要）</span></li>
-                <li><strong>3.0 〜 9.9 mm</strong><span>強い雨（大きめの傘推奨）</span></li>
-                <li><strong>10.0 mm 〜</strong><span>激しい雨（傘だけでは濡れるかも）</span></li>
+                <li><strong>0.1 〜 0.9 mm/h</strong><span>弱い雨（折りたたみ傘があると安心）</span></li>
+                <li><strong>1.0 〜 9.9 mm/h</strong><span>傘が必要（長傘がおすすめ）</span></li>
+                <li><strong>10 〜 19.9 mm/h</strong><span>やや強い雨（足元がぬれやすい）</span></li>
+                <li><strong>20 〜 29.9 mm/h</strong><span>強い雨（傘をさしていてもぬれる）</span></li>
+                <li><strong>30 〜 49.9 mm/h</strong><span>激しい雨（道路が川のようになる）</span></li>
+                <li><strong>50 mm/h 〜</strong><span>非常に激しい雨〜（傘は役に立たない）</span></li>
             </ul>
+            <p class="umbrella-guide-note">
+                10 mm/h以上は<a href="https://www.jma.go.jp/jma/kishou/know/yougo_hp/amehyo.html" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">気象庁「雨の強さと降り方」</a>に準拠。10 mm/h未満の傘の種類は本アプリ独自の目安です。
+            </p>
         </div>
     </main>
 
     <!-- 設定モーダル -->
-    <div id="settings-modal" class="modal hidden">
+    <div id="settings-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="modal-content">
-            <h2>位置情報の設定</h2>
+            <h2 id="settings-title">位置情報の設定</h2>
 
             <!-- 地名検索エリア -->
             <div class="search-section">
                 <form id="search-form" class="form-group search-group">
-                    <input type="text" id="input-search" placeholder="地名を入力 (例: 東京, 大阪, ニューヨーク)">
+                    <input type="text" id="input-search" aria-label="地名を検索" maxlength="100" autocomplete="off" placeholder="地名を入力 (例: 東京, 大阪, ニューヨーク)">
                     <button type="submit" id="btn-search" class="btn-primary">🔍 検索</button>
                 </form>
                 <div id="search-results" class="search-results"></div>
@@ -79,6 +100,13 @@
                 <label for="input-lon">経度 (Longitude)</label>
                 <input type="number" id="input-lon" step="0.0001" placeholder="139.6917">
             </div>
+            <div class="test-mode-setting">
+                <input type="checkbox" id="input-test-mode">
+                <label for="input-test-mode">
+                    <strong>テストモード</strong>
+                    <span>更新するたび、7〜17時の天気をランダム生成</span>
+                </label>
+            </div>
             <div class="modal-actions">
                 <button id="btn-get-gps" class="btn-primary">📍 現在地を取得</button>
                 <button id="btn-save-settings" class="btn-success">保存して更新</button>
@@ -87,6 +115,6 @@
         </div>
     </div>
 
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=9"></script>
 </body>
 </html>

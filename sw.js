@@ -1,14 +1,18 @@
-const CACHE_NAME = 'appare-cache-v5';
+const CACHE_NAME = 'appare-cache-v13';
 const urlsToCache = [
   './',
   './index.html',
-  './styles.css?v=2',
-  './script.js?v=2',
+  './styles.css?v=8',
+  './script.js?v=9',
+  './manifest.json',
   './icon_normal.png',
   './icon_dancing.png',
   './icon_dried.png',
   './icon.png'
 ];
+const cacheableRequestUrls = new Set(
+  urlsToCache.map(path => new URL(path, self.location.href).href)
+);
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -34,20 +38,30 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // ネットワークファースト (Network First) 戦略
-  // 常に最新のファイルを取りに行き、オフライン時のみキャッシュを使う
+  if (event.request.method !== 'GET') return;
+
+  const requestUrl = new URL(event.request.url);
+
+  // 外部APIの応答（検索語・位置情報・天気データ）はService Workerに保存しない。
+  if (requestUrl.origin !== self.location.origin) return;
+
   event.respondWith(
     fetch(event.request).then(response => {
-      // 正常なレスポンス(200)の場合のみキャッシュを更新（エラーキャッシュによる汚染を防ぐ）
-      if (response && response.status === 200) {
+      if (response && response.ok && response.type === 'basic' && cacheableRequestUrls.has(requestUrl.href)) {
         const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseClone);
-        });
+        return caches.open(CACHE_NAME)
+          .then(cache => cache.put(event.request, responseClone))
+          .then(() => response)
+          .catch(() => response);
       }
       return response;
-    }).catch(() => {
-      return caches.match(event.request);
+    }).catch(async () => {
+      const cachedResponse = await caches.match(event.request);
+      if (cachedResponse) return cachedResponse;
+      if (event.request.mode === 'navigate') {
+        return caches.match('./index.html');
+      }
+      return new Response('Offline', { status: 503, statusText: 'Offline' });
     })
   );
 });
